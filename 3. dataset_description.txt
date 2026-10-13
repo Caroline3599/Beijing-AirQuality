@@ -1,0 +1,15 @@
+No: Row number
+year, month, day, hour:	Date and time of the recorded measurement
+PM2.5: Fine particulate matter ≤2.5 micrometres in diameter (µg/m³). Small enough to penetrate deep into the lungs and bloodstream.
+PM10: Coarser particulate matter ≤10 micrometres in diameter (µg/m³), includes PM2.5 plus larger particles such as dust and pollen.
+SO2: Sulfur dioxide concentration (µg/m³). Produced mainly by burning coal and fossil fuels.
+NO2: Nitrogen dioxide concentration (µg/m³). Produced mainly by vehicle emissions and combustion.
+CO: Carbon monoxide concentration (µg/m³). Produced by incomplete combustion (traffic, heating).
+O3: Ground-level ozone concentration (µg/m³). Formed by chemical reactions between NO2 and sunlight, not emitted directly.
+TEMP: Air temperature (degree Celsius)
+PRES: Atmospheric pressure (hPa)
+DEWP: Dew point temperature (°C) — temperature at which air becomes saturated with moisture
+RAIN: Precipitation (mm)
+wd: Wind direction, given as compass abbreviations (e.g. N = North, NE = Northeast, SW = Southwest, ENE = East-northeast). 16-point compass notation.
+WSPM: Wind speed (m/s)
+station: name of the air-quality monitoring site.
