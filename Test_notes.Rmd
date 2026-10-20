@@ -1,0 +1,13 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Q01: Import "2. Beijing_AirQuality.csv" without altering column names. How many cols and rows exist in raw data?
+
+```{r}
+air <- read.csv("./instruction/2. Beijing_AirQuality.csv")
+dim(air)
+```
+
+
