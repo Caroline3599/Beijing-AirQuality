@@ -6,26 +6,81 @@
 # ---------------------------------------------------------------------
 # Q01: Import "2. Beijing_AirQuality.csv" without altering column names. 
 # How many cols and rows exist in raw data?
+beijing_airquality <- read.csv("./Instruction/2. Beijing_AirQuality.csv",
+                               check.names = FALSE,
+                               stringsAsFactors = FALSE)
+names(beijing_airquality)
+dim(beijing_airquality)
+
 
 # Q02: Create a copy of the dataset for cleaning (`air`). 
 # Clean column names to lowercase and replace spaces/punctuation with underscores.
+air <- beijing_airquality
+cols_clean <- tolower(names(air))
+cols_clean <-gsub("[^a-z0-9]+", "_", cols_clean) 
+cols_clean <- gsub("^_|_$", "", cols_clean)
+names(air) <- cols_clean
+names(air)
 
 # Q03: Inspect dataset structure. Which columns are numeric in R? 
 # Which are text? Create `num_cols` and `char_cols` variables.
+str(air)
+num_cols <- names(air)[sapply(air, is.numeric)]
+char_cols <- names(air)[sapply(air, is.character)]
+
+num_cols
+char_cols
 
 # Q04: Count the number of missing values (NA) for each column in the raw data.
+na_counts <- colSums(is.na(air))
+na_counts
 
 # Q05: How many exact duplicated rows exist in the dataset? 
 # Remove them and verify the new row count.
+air_dup <- duplicated(air)
+sum(air_dup)
+air <- air[!air_dup, ]
+nrow(air)
+
+# 7900 duplicates with 175320 rows remaining
 
 # Q06: Trim leading/trailing whitespace from all character columns, 
 # and convert blank strings ("") to NA.
+before <- air[char_cols]  
+air[char_cols] <- lapply(air[char_cols], function(x) {
+  x <- trimws(x)
+  x[x == ""] <- NA
+  x
+})
+
+sum(before != air[char_cols], na.rm = TRUE)
+sum(is.na(air[char_cols])) - sum(is.na(before))
+
+air$station
 
 # Q07: Standardize the `station` column categories to lowercase to ensure consistency.
+air$station <- tolower(air$station)
+unique(air$station)
+table(air$station)
+
+# 5 stations, 35064 rows each
 
 # Q08: Define the strict 16 compass wind directions (e.g., N, NNE, NE...). 
 # How many `wd` values match these patterns? Set non-matching/invalid values to NA.
+valid_wd <- c("N", "E", "S", "W", 
+              "NE", "SE", "SW", "NW", 
+              "NNE", "ENE", "ESE", "SSE", 
+              "SSW", "WSW", "WNW", "NNW")
+air$wd <- toupper(air$wd)
+is_valid <- air$wd %in% valid_wd
+sum(is_valid)
+air$wd[!is_valid] <- NA
 
+
+#checkk
+length(valid_wd)
+table(air$station)
+sum(is.na(air$wd))
 
 # Part 2: Cleaning Numbers (Lecture 5B)
 # ---------------------------------------------------------------------
