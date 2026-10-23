@@ -194,7 +194,8 @@ tapply(clean$no, clean$station, function(x) {
 
 # Q02: Validate that for each `station`, row numbers (`no`) and datetimes 
 # (`year`-`month`-`day`-`hour`) increase strictly and monotonically.
-clean$datetime <- as.Date(clean$year, clean$month, clean$day)
+clean$datetime <- as.POSIXct(paste(clean$year, clean$month, clean$day, clean$hour, sep = "-"), 
+                             format = "%Y-%m-%d-%H", tz = "UTC")
 clean <- clean[order(clean$station, clean$datetime), ]
 time_seq_check <- aggregate(datetime ~ station, data = clean, function(x) {
   all(diff(x) > 0)
@@ -240,3 +241,19 @@ str(baseline)
 saveRDS(baseline, file = "clean_air_dyq.rds")
 
 head(clean_air_dyq)
+
+
+# colSums(is.na(b_airquality))
+# colSums(is.na(clean_air_dyq))
+# sum(duplicated(b_airquality))
+# sum(duplicated(clean_air_dyq))
+# ordered(clean_air_dyq$hour)
+# ordered(b_airquality$hour)
+# diff(b_airquality$hour, clean_air_dyq$hour)
+
+# dim(b_airquality)
+# dim(clean_air_dyq)
+# test <- !duplicated(air)
+# est2 <- air[test,]
+# sum(test2$hour[test2$hour == 25], na.rm = TRUE)
+# sum(is.na(clean$hour))
