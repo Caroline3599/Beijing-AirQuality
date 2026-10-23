@@ -25,6 +25,7 @@
 # How many cols and rows exist in raw data?
 air <- read.csv("./instruction/2. Beijing_AirQuality.csv")
 dim(air) # [1] 183220     18
+summary(air$TEMP)
 
 # Q02: Create a copy of the dataset for cleaning (`air`). 
 # Clean column names to lowercase and replace spaces/punctuation with underscores.
@@ -153,56 +154,87 @@ for(name in names(num_cols)[num_cols == TRUE]) {
   print(paste(name, ":", get_upper(clean[[name]])))
 }
 
-summary(clean)
 
 # Q11: Using the 1.5 x IQR rule, how many values in each numeric column 
 # are flagged as potential statistical outliers?
-
-
+set_outlier <- function(col_name, df = clean) {
+  col <- df[[col_name]]
+  q1 <- quantile(col, 0.25, na.rm = TRUE)
+  q3 <- quantile(col, 0.75, na.rm = TRUE)
+  iqr = q3 - q1
+  upper <- q3 + 1.5*iqr
+  # outlier column name
+  flag_name <- paste0("flag_", gsub("\\.", "", col_name), "_outlier")
+  df[[flag_name]] <- !is.na(col) & col > upper
+  print(paste(col_name, ":", sum(df[[flag_name]], na.rm = TRUE), "(no of outliers)"))
+  
+  return(df)
+}
+for(name in names(num_cols)[num_cols == TRUE]) {
+  clean <- set_outlier(name, clean)
+}
+str(clean)
 
 # Q12: What is the sum of potential-outlier counts across all numeric columns? 
 # (Remember: unusual is not wrong, keep and flag).
-
-
+outlier_col <- grep("_outlier$", names(clean), value = TRUE)
+sum_outlier <- sum(sapply(clean[outlier_col], sum), na.rm = TRUE)
+sum_outlier
 
 # Part 3: Cross-Field Validation & Baseline Export
 # ---------------------------------------------------------------------
 # Q01: Are all `no` values strictly continuous integers? 
 # Check with summary statistics and duplicates.
+sum(duplicated(clean$no))
+tapply(clean$no, clean$station, function(x) {
+  all_unique <- length(unique(x)) == length(x)
+  is_continous <- max(x) - min(x) + 1 == length(x)
+  return(c(Unique = all_unique, Continous = is_continous))
+})
+help(tapply)
 
 # Q02: Validate that for each `station`, row numbers (`no`) and datetimes 
 # (`year`-`month`-`day`-`hour`) increase strictly and monotonically.
+clean$datetime <- as.Date(clean$year, clean$month, clean$day, min = 0, sec = 0, tz = "UTC")
+clean <- clean[order(clean$station, clean$datetime), ]
+time_seq_check <- aggregate(datetime ~ station, data = clean, function(x) {
+  all(diff(x) > 0)
+})
+time_seq_check
+sum(is.na(clean$datetime))
 
 # Q03: Ensure all pollutants, rain, and wind speeds satisfy the non-negative constraint (>= 0).
+summary(clean)
+
 
 # Q04: Check that PM10 is greater than or equal to PM2.5 
 # (PM2.5 must be a subset of PM10).
+clean$flag_pm_conflict <- !is.na(clean$pm2.5) & !is.na(clean$pm10) & (clean$pm2.5 > clean$pm10)
+sum(clean$flag_pm_conflict, na.rm = TRUE)
+clean$pm10[clean$flag_pm_conflict] <- NA
+clean$pm2.5[clean$flag_pm_conflict] <- NA
+
 
 # Q05: Verify that Dew Point (DEWP) does not exceed Air Temperature (TEMP) (DEWP <= TEMP).
+clean$flag_dewp_conflict <- !is.na(clean$dewp) & !is.na(clean$temp) & (clean$temp < clean$dewp)
+sum(clean$flag_dewp_confilit, na.rm = TRUE)
 
 # Q06: Ensure meteorological precipitation (RAIN) is valid and non-negative.
+summary(clean$rain)
+sum(clean$flag_rain_outlier)
+sum(clean$rain, na.rm = TRUE)
 
 # Q07: When RAIN > 0, check if DEWP and TEMP are closely aligned 
 # (high moisture condition check).
+clean$flag_temp_conflict <- (clean$temp - clean$dewp)
+head(clean$flag_temp_conflict)
+head(clean)
 
 # Q08: Construct a clean `baseline` dataset by filtering out rows 
 #with critical structural/date failures, and export it to an `.rds` file 
 
-
-
-
-
-
-
-
-
-sum(duplicated(clean$no))
-clean[clean$no == 1,]
 dim(clean)
-35064
-175320/5
-
-
-
-
-
+clean[is.na(clean$datetime),]
+baseline <- clean[!is.na(clean$datetime) & !is.na(clean$station), ]
+str(baseline)
+saveRDS(baseline, file = "clean_air_dyq.rds")
