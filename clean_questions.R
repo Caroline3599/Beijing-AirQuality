@@ -85,29 +85,58 @@ sum(is.na(air$wd))
 # Part 2: Cleaning Numbers (Lecture 5B)
 # ---------------------------------------------------------------------
 # Q01: Count missing values (NA) specifically across all numeric columns.
+colSums(is.na(air[num_cols]))
 
 # Q02: Flag `no` values that are zero or negative, and set them to NA.
+bad_no <- air$no <= 0
+sum(bad_no, na.rm = TRUE)
+air$no[which(bad_no)] <- NA
 
 # Q03: Flag `year` values that are zero, negative, or out of expected range 
 # (e.g., < 2000 or > 2030), and set them to NA.
+bad_year <- air$year < 2000 | air$year > 2030
+sum(bad_year, na.rm = TRUE)
+air$year[which(bad_year)] <- NA
 
 # Q04: Flag `month` values outside the range 1-12, and set them to NA.
+bad_month <- air$month < 1 | air$month > 12
+sum(bad_month, na.rm = TRUE)
+air$month[which(bad_month)] <- NA
+
 
 # Q05: Flag `day` values outside the range 1-31 (or invalid for specific months), 
 # and set them to NA.
+bad_day <- air$day < 1 | air$day > 31
+sum(bad_day, na.rm = TRUE)
+air$day[which(bad_day)] <- NA
+
 
 # Q06: Flag `hour` values outside the range 0-23, and set them to NA.
+bad_hour <- air$hour < 0 | air$hour > 24
+sum(bad_hour, na.rm = TRUE)
+air$hour[which(bad_hour)] <- NA
 
 # Q07: Check `temp` values. Cap unusual temperatures outside the realistic range
 # (-50 ~ +50 °C) or flag them.
+bad_temp <- air$temp < -50 | air$temp > 50
+sum(bad_temp, na.rm = TRUE)
+air$temp[which(bad_temp)] <- NA
+
 
 # Q08: Flag pollutant values (PM2.5, PM10, NO2, SO2, CO, O3, PRES) 
 # that are zero or negative, and set them to NA.
+pollutants <- c("pm2_5", "pm10", "so2", "no2",
+              "co", "o3", "temp",  "pres")
+bad_poll <- pollutants <= 0
+sum(bad_poll, na.rm = TRUE)
+pollutants[which(bad_poll)] <- NA
+
 
 # Q09: Flag meteorological values (RAIN, WSPM) that are negative, and set them to NA.
 
 # Q10: Calculate and report the upper limit (maximum values) 
 # for all numeric columns after handling impossible values.
+sapply(air[num_cols], max, na.rm = TRUE)
 
 
 # Q11: Using the 1.5 x IQR rule, how many values in each numeric column 
