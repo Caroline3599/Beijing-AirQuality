@@ -191,11 +191,11 @@ tapply(clean$no, clean$station, function(x) {
   is_continous <- max(x) - min(x) + 1 == length(x)
   return(c(Unique = all_unique, Continous = is_continous))
 })
-help(tapply)
 
 # Q02: Validate that for each `station`, row numbers (`no`) and datetimes 
 # (`year`-`month`-`day`-`hour`) increase strictly and monotonically.
-clean$datetime <- as.Date(clean$year, clean$month, clean$day, min = 0, sec = 0, tz = "UTC")
+clean$datetime <- as.POSIXct(paste(clean$year, clean$month, clean$day, clean$hour, sep = "-"), 
+                             format = "%Y-%m-%d-%H", tz = "UTC")
 clean <- clean[order(clean$station, clean$datetime), ]
 time_seq_check <- aggregate(datetime ~ station, data = clean, function(x) {
   all(diff(x) > 0)
@@ -205,7 +205,7 @@ sum(is.na(clean$datetime))
 
 # Q03: Ensure all pollutants, rain, and wind speeds satisfy the non-negative constraint (>= 0).
 summary(clean)
-
+head(clean)
 
 # Q04: Check that PM10 is greater than or equal to PM2.5 
 # (PM2.5 must be a subset of PM10).
@@ -236,5 +236,24 @@ head(clean)
 dim(clean)
 clean[is.na(clean$datetime),]
 baseline <- clean[!is.na(clean$datetime) & !is.na(clean$station), ]
+baseline <- baseline[order(baseline$station, baseline$no), ]
 str(baseline)
 saveRDS(baseline, file = "clean_air_dyq.rds")
+
+head(clean_air_dyq)
+
+
+# colSums(is.na(b_airquality))
+# colSums(is.na(clean_air_dyq))
+# sum(duplicated(b_airquality))
+# sum(duplicated(clean_air_dyq))
+# ordered(clean_air_dyq$hour)
+# ordered(b_airquality$hour)
+# diff(b_airquality$hour, clean_air_dyq$hour)
+
+# dim(b_airquality)
+# dim(clean_air_dyq)
+# test <- !duplicated(air)
+# est2 <- air[test,]
+# sum(test2$hour[test2$hour == 25], na.rm = TRUE)
+# sum(is.na(clean$hour))
